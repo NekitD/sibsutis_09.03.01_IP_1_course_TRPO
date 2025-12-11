@@ -1,0 +1,37 @@
+default:
+  image: registry.csc.sibsutis.ru/trpo/ci
+  
+.build-script:
+  script:
+    - echo "Compiling the code..."
+    - make
+    - echo "Compile complete."
+
+.check-codestyle:
+  script:
+    - echo "Check codestyle..."
+    - git ./src/libgame ./src/lifegame *.c *.h | xargs clang-format -i --verbose && git diff --exit-code
+    - echo "Codestyle is fine."
+
+.test-script:
+ script:
+    - echo "Running tests..."
+    - make test
+    - echo "Tests complete."
+
+stages:
+  - check-codestyle
+  - build
+  - test
+
+checkstyle:
+  stage: check-codestyle
+  extends: .check-codestyle
+
+build:
+  stage: build
+  extends: .build-script
+
+test:
+  stage: test
+  extends: .test-script
